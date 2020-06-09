@@ -8,21 +8,16 @@
 #pragma comment(lib, "strmiids")
 
 #if PY_MAJOR_VERSION >= 3
-#ifndef IS_PY3K
-#define IS_PY3K 1
-#endif
+	#ifndef IS_PY3K
+	#define IS_PY3K 1
+	#endif
 #endif
 
 struct module_state {
     PyObject *error;
 };
 
-#if defined(IS_PY3K)
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else
-#define GETSTATE(m) (&_state)
-static struct module_state _state;
-#endif
 
 // #pragma comment(lib, "kernel32")
 // #pragma comment(lib, "user32")
@@ -152,61 +147,46 @@ static PyMethodDef Methods[] =
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC
-initdevice(void);
 
-#if defined(IS_PY3K)
 
-static int device_traverse(PyObject *m, visitproc visit, void *arg) {
-    Py_VISIT(GETSTATE(m)->error);
-    return 0;
-}
+	static int device_traverse(PyObject *m, visitproc visit, void *arg) {
+		Py_VISIT(GETSTATE(m)->error);
+		return 0;
+	}
 
-static int device_clear(PyObject *m) {
-    Py_CLEAR(GETSTATE(m)->error);
-    return 0;
-}
+	static int device_clear(PyObject *m) {
+		Py_CLEAR(GETSTATE(m)->error);
+		return 0;
+	}
 
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "device",
-    NULL,
-    sizeof(struct module_state),
-    Methods,
-    NULL,
-    device_traverse,
-    device_clear,
-    NULL
-};
+	static struct PyModuleDef moduledef = {
+		PyModuleDef_HEAD_INIT,
+		"device",
+		NULL,
+		sizeof(struct module_state),
+		Methods,
+		NULL,
+		device_traverse,
+		device_clear,
+		NULL
+	};
 
-#define INITERROR return NULL
+	#define INITERROR 
 
 PyMODINIT_FUNC
 PyInit_device(void)
-
-#else
-#define INITERROR return
-void
-initdevice(void)
-#endif
 {
-#if defined(IS_PY3K)
     PyObject *module = PyModule_Create(&moduledef);
-#else
-    PyObject *module = Py_InitModule("device", Methods);
-#endif
 
     if (module == NULL)
-        INITERROR;
+        return NULL;
     struct module_state *st = GETSTATE(module);
 
     st->error = PyErr_NewException("dbr.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
-        INITERROR;
+        return NULL;
     }
 
-#if defined(IS_PY3K)
     return module;
-#endif
 }
