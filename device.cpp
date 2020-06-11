@@ -1,3 +1,4 @@
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
@@ -119,12 +120,21 @@ PyObject* DisplayDeviceInformation(IEnumMoniker *pEnum)
 	return pyList;
 }
 
+//Returning NULL means error.
+//We could try returning an empty list instead?
 static PyObject *
 getDeviceList(PyObject *self, PyObject *args)
 {
 	PyObject* pyList = NULL; 
 	
 	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	
+	//backup; run it without multithreading.
+	if (!SUCCEEDED(hr))
+	{				
+		hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	}
+	
 	if (SUCCEEDED(hr))
 	{
 		IEnumMoniker *pEnum;
@@ -136,6 +146,8 @@ getDeviceList(PyObject *self, PyObject *args)
 			pEnum->Release();
 		}
 		CoUninitialize();
+	} else {
+		PyErr_SetString(PyExc_TypeError, "Could not call CoInitializeEx");		
 	}
 
     return pyList;
@@ -143,46 +155,47 @@ getDeviceList(PyObject *self, PyObject *args)
 
 static PyMethodDef Methods[] =
 {
-    {"getDeviceList", getDeviceList, METH_VARARGS, NULL},
+    {"getDeviceList", getDeviceList, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 
 
 
-	static int device_traverse(PyObject *m, visitproc visit, void *arg) {
-		Py_VISIT(GETSTATE(m)->error);
-		return 0;
-	}
+static int device_traverse(PyObject *m, visitproc visit, void *arg) {
+	Py_VISIT(GETSTATE(m)->error);
+	return 0;
+}
 
-	static int device_clear(PyObject *m) {
-		Py_CLEAR(GETSTATE(m)->error);
-		return 0;
-	}
+static int device_clear(PyObject *m) {
+	Py_CLEAR(GETSTATE(m)->error);
+	return 0;
+}
 
-	static struct PyModuleDef moduledef = {
-		PyModuleDef_HEAD_INIT,
-		"device",
-		NULL,
-		sizeof(struct module_state),
-		Methods,
-		NULL,
-		device_traverse,
-		device_clear,
-		NULL
-	};
-
-	#define INITERROR 
+static struct PyModuleDef moduledef = {
+	PyModuleDef_HEAD_INIT,
+	"device",
+	NULL,
+	sizeof(struct module_state),
+	Methods,
+	NULL,
+	device_traverse,
+	device_clear,
+	NULL
+};
+ 
 
 PyMODINIT_FUNC
 PyInit_device(void)
 {
-    PyObject *module = PyModule_Create(&moduledef);
+    PyObject *module;
+	module = PyModule_Create(&moduledef);
 
     if (module == NULL)
         return NULL;
+	
     struct module_state *st = GETSTATE(module);
 
-    st->error = PyErr_NewException("dbr.Error", NULL, NULL);
+    st->error = PyErr_NewException("device.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
         return NULL;

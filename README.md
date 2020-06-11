@@ -3,21 +3,11 @@
 
 ## Environment
 * [Microsoft Windows SDK][0]
-* Python 2.7.9 / Python 3.6.5
-* OpenCV 3.3.0
+* Python 3.x (tested on Python 3.7)
+* OpenCV (tested on 4.2.0)
 
 ## How to Run 
-1. Configure Visual Studio environment:
-    * Visual Studio 2010 (VS10): SET VS90COMNTOOLS=%VS100COMNTOOLS%
-    * Visual Studio 2012 (VS11): SET VS90COMNTOOLS=%VS110COMNTOOLS%
-    * Visual Studio 2013 (VS12): SET VS90COMNTOOLS=%VS120COMNTOOLS%
-    * Visual Studio 2015 (VS14): SET VS90COMNTOOLS=%VS140COMNTOOLS%
-
-    If you are using **Visual Studio 2015**, use the following command:
-
-    ```
-    SET VS90COMNTOOLS=%VS140COMNTOOLS%
-    ```
+1. Have VisualStudio 2019 installed.    
 
 2. Add your Windows SDK lib path to **setup.py**:
 
@@ -36,26 +26,22 @@
     ```
 
 3. Build the Python extension
-
-    Python 2
-
-    ```
-    python setup.py build install
-    ```
-
     Python 3
 
     ```
-    python3 setup.py build install
+    python3 setup.py build 
     ```
+	
+	or
+	
+	```
+	python3 setup.py build install
+	```
+	
+	if you want it copied to your python installation directory
+	
 
 4. Run the app and select a capture device:
-
-    Python 2
-
-    ```python
-    python test.py
-    ```
 
     Python 3
     ```python
@@ -64,7 +50,5 @@
     ![camera list in Python](screenshot/python-list-device.PNG)
 
 ## Blog
-[Listing Multiple Cameras for OpenCV-Python on Windows][1]
 
-[0]:https://en.wikipedia.org/wiki/Microsoft_Windows_SDK
-[1]:http://www.codepool.biz/multiple-camera-opencv-python-windows.html
+Originally forked from yushulx/python-capture-device-list
