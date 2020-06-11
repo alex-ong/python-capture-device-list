@@ -50,5 +50,5 @@
     ![camera list in Python](screenshot/python-list-device.PNG)
 
 ## Blog
-
+[0]:https://en.wikipedia.org/wiki/Microsoft_Windows_SDK
 Originally forked from yushulx/python-capture-device-list
